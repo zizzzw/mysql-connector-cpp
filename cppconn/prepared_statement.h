@@ -91,6 +91,9 @@ public:
   virtual void setString(unsigned int parameterIndex, const sql::SQLString& value) = 0;
 
   virtual PreparedStatement * setResultSetType(sql::ResultSet::enum_type type) = 0;
+
+
+  virtual void setFloat(unsigned int parameterIndex, float value) = 0;
 };
 
 

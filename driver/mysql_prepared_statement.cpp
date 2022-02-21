@@ -732,6 +732,42 @@ MySQL_Prepared_Statement::setDouble(unsigned int parameterIndex, double value)
 }
 /* }}} */
 
+void
+MySQL_Prepared_Statement::setFloat(unsigned int parameterIndex, float value)
+{
+  CPP_ENTER("MySQL_Prepared_Statement::setFloat");
+  CPP_INFO_FMT("this=%p %f", this, value);
+  checkClosed();
+
+  if (parameterIndex == 0 || parameterIndex > param_count) {
+    throw InvalidArgumentException("MySQL_Prepared_Statement::setFloat: invalid 'parameterIndex'");
+  }
+  --parameterIndex; /* DBC counts from 1 */
+
+  {
+    MySQL_ParamBind::Blob_t dummy;
+    param_bind->setBlob(parameterIndex, dummy, false);
+    param_bind->unset(parameterIndex);
+  }
+
+  enum_field_types t = MYSQL_TYPE_FLOAT;
+
+  BufferSizePair p = allocate_buffer_for_type(t);
+
+  param_bind->set(parameterIndex);
+  MYSQL_BIND * param = &param_bind->getBindObject()[parameterIndex];
+
+  param->buffer_type	= t;
+  delete [] static_cast<char *>(param->buffer);
+  param->buffer = p.first;
+  param->buffer_length = 0;
+  param->is_null_value = 0;
+  delete param->length;
+  param->length	= NULL;
+
+  memcpy(param->buffer, &value, p.second);
+}
+
 
 /* {{{ MySQL_Prepared_Statement::setInt() -I- */
 void

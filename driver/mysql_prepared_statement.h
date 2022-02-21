@@ -178,6 +178,9 @@ public:
 
   sql::PreparedStatement * setResultSetType(sql::ResultSet::enum_type type);
 
+
+  void setFloat(unsigned int parameterIndex, float value);
+
 private:
   /* Prevent use of these */
   MySQL_Prepared_Statement(const MySQL_Prepared_Statement &);
