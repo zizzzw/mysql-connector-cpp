@@ -389,6 +389,45 @@ MySQL_ResultSet::getDouble(const sql::SQLString& columnLabel) const
 /* }}} */
 
 
+double
+MySQL_ResultSet::getFloat(const uint32_t columnIndex) const
+{
+    CPP_ENTER("MySQL_ResultSet::getFloat(int)");
+
+    /* isBeforeFirst checks for validity */
+    if (isBeforeFirstOrAfterLast()) {
+        throw sql::InvalidArgumentException("MySQL_ResultSet::getFloat: can't fetch because not on result set");
+    }
+
+    if (columnIndex == 0 || columnIndex > num_fields) {
+        throw sql::InvalidArgumentException("MySQL_ResultSet::getFloat: invalid value of 'columnIndex'");
+    }
+
+    last_queried_column = columnIndex;
+
+    if (row[columnIndex - 1] == NULL) {
+        was_null = true;
+        return 0.0;
+    }
+    was_null = false;
+    if (getFieldMeta(columnIndex)->type == MYSQL_TYPE_BIT) {
+        return static_cast<double>(getInt64(columnIndex));
+    }
+    return sql::mysql::util::strtonum(row[columnIndex - 1]);
+}
+/* }}} */
+
+
+/* {{{ MySQL_ResultSet::getFloat() -I- */
+double
+MySQL_ResultSet::getFloat(const sql::SQLString& columnLabel) const
+{
+    CPP_ENTER("MySQL_ResultSet::getDouble(string)");
+    return getFloat(findColumn(columnLabel));
+}
+/* }}} */
+
+
 /* {{{ MySQL_ResultSet::getFetchDirection() -U- */
 int
 MySQL_ResultSet::getFetchDirection()

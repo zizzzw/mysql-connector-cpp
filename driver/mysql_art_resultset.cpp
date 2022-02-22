@@ -500,6 +500,37 @@ MySQL_ArtResultSet::getDouble(const sql::SQLString& columnLabel) const
 /* }}} */
 
 
+//for float
+/* {{{ MySQL_ArtResultSet::getFloat() -I- */
+double
+MySQL_ArtResultSet::getFloat(uint32_t columnIndex) const
+{
+  CPP_ENTER("MySQL_ArtResultSet::getFloat(int)");
+
+  /* isBeforeFirst checks for validity */
+  if (isBeforeFirstOrAfterLast()) {
+    throw sql::InvalidArgumentException("MySQL_ArtResultSet::getFloat: can't fetch because not on result set");
+  }
+
+  if (columnIndex > num_fields || columnIndex == 0) {
+    throw sql::InvalidArgumentException("MySQL_ArtResultSet::getFloat: invalid value of 'columnIndex'");
+  }
+
+  return (*current_record)[columnIndex - 1].getDouble();
+}
+/* }}} */
+
+
+/* {{{ MySQL_ArtResultSet::getFloat() -I- */
+double
+MySQL_ArtResultSet::getFloat(const sql::SQLString& columnLabel) const
+{
+  CPP_ENTER("MySQL_ArtResultSet::getFloat(string)");
+  return getFloat(findColumn(columnLabel));
+}
+/* }}} */
+
+
 /* {{{ MySQL_ArtResultSet::getFetchDirection() -U- */
 int
 MySQL_ArtResultSet::getFetchDirection()

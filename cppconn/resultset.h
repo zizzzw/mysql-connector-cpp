@@ -109,6 +109,10 @@ public:
   virtual long double getDouble(uint32_t columnIndex) const = 0;
   virtual long double getDouble(const sql::SQLString& columnLabel) const = 0;
 
+// /* for float */
+  virtual double getFloat(uint32_t columnIndex) const = 0;
+  virtual double getFloat(const sql::SQLString& columnLabel) const = 0;
+
   virtual int getFetchDirection() = 0;
   virtual size_t getFetchSize() = 0;
   virtual int getHoldability() = 0;

@@ -124,6 +124,9 @@ public:
   long double getDouble(uint32_t columnIndex) const;
   long double getDouble(const sql::SQLString& columnLabel) const;
 
+  double getFloat(uint32_t columnIndex) const;
+  double getFloat(const sql::SQLString& columnLabel) const;
+
   int getFetchDirection();
 
   size_t getFetchSize();

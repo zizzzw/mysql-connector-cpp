@@ -491,6 +491,92 @@ MySQL_Prepared_ResultSet::getDouble(const sql::SQLString& columnLabel) const
 /* }}} */
 
 
+//for float
+double
+MySQL_Prepared_ResultSet::getFloat(const uint32_t columnIndex) const
+{
+    CPP_ENTER("MySQL_Prepared_ResultSet::getFloat(int)");
+    CPP_INFO_FMT("column=%u", columnIndex);
+
+    /* isBeforeFirst checks for validity */
+    if (isBeforeFirstOrAfterLast()) {
+        throw sql::InvalidArgumentException("MySQL_Prepared_ResultSet::getFloat: can't fetch because not on result set");
+    }
+
+    if (columnIndex == 0 || columnIndex > num_fields) {
+        throw sql::InvalidArgumentException("MySQLPreparedResultSet::getFloat: invalid 'columnIndex'");
+    }
+
+    last_queried_column = columnIndex;
+
+    if (*result_bind->rbind[columnIndex - 1].is_null) {
+        return 0.0;
+    }
+
+    switch (rs_meta->getColumnType(columnIndex)) {
+        case sql::DataType::BIT:
+        case sql::DataType::YEAR:	
+        case sql::DataType::TINYINT:
+        case sql::DataType::SMALLINT:
+        case sql::DataType::MEDIUMINT:
+        case sql::DataType::INTEGER:
+        case sql::DataType::BIGINT:
+        {
+            long double ret;
+            bool is_it_unsigned = result_bind->rbind[columnIndex - 1].is_unsigned != 0;
+            CPP_INFO_FMT("It's an int : %ssigned", is_it_unsigned? "un":"");
+            if (is_it_unsigned) {
+                uint64_t ival = getUInt64_intern(columnIndex, false);
+                CPP_INFO_FMT("value=%llu", ival);
+                ret = static_cast<long double>(ival);
+            } else {
+                int64_t ival = getInt64_intern(columnIndex, false);
+                CPP_INFO_FMT("value=%lld", ival);
+                ret = static_cast<long double>(ival);
+            }
+            CPP_INFO_FMT("value=%10.10f", (double) ret);
+            return ret;
+        }
+        case sql::DataType::NUMERIC:
+        case sql::DataType::DECIMAL:
+        case sql::DataType::TIMESTAMP:
+        case sql::DataType::DATE:
+        case sql::DataType::TIME:
+        case sql::DataType::CHAR:
+        case sql::DataType::BINARY:
+        case sql::DataType::VARCHAR:
+        case sql::DataType::VARBINARY:
+        case sql::DataType::LONGVARCHAR:
+        case sql::DataType::LONGVARBINARY:
+        case sql::DataType::SET:
+        case sql::DataType::ENUM:
+        case sql::DataType::JSON:
+        {
+            CPP_INFO("It's a string");
+            double ret = sql::mysql::util::strtonum(getString(columnIndex).c_str());
+            CPP_INFO_FMT("value=%10.10f", ret);
+            return ret;
+        }
+
+    }
+    CPP_ERR("MySQL_Prepared_ResultSet::getFloat: unhandled type. Please, report");
+    throw sql::MethodNotImplementedException("MySQL_Prepared_ResultSet::getFloat: unhandled type. Please, report");
+    return .0; 
+}
+/* }}} */
+
+
+/* {{{ MySQL_Prepared_ResultSet::getFloat() -I- */
+double
+MySQL_Prepared_ResultSet::getFloat(const sql::SQLString& columnLabel) const
+{
+    CPP_ENTER("MySQL_Prepared_ResultSet::getFloat(string)");
+    return getFloat(findColumn(columnLabel));
+}
+
+
+
+
 /* {{{ MySQL_Prepared_ResultSet::getFetchDirection() -U- */
 int
 MySQL_Prepared_ResultSet::getFetchDirection()
